@@ -26,6 +26,7 @@ jobs:
       
       - name: Storing artifact
         uses: actions/upload-artifact@v2
+        retention-days: 1
         with:
           name: app-build
           path: ${{ github.sha }}.tar.gz
@@ -73,6 +74,22 @@ jobs:
           port: 22
           script: |
             ln -s -n -f /home/project/releases/${{ github.sha }}/build /var/www/html/current
+  clean-up:
+    runs-on: ubuntu-latest
+    needs: set-release
+    name: Clean up
+    steps:
+      - name: Activating release
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DO_HOST }}
+          username: ${{ secrets.DO_USER }}
+          key: ${{ secrets.DO_KEY }}
+          port: 22
+          script: |
+            rm /tmp/*.tar.gz
+            cd /home/project/releases && ls -t -1 | tail -n +6 | xargs rm -rf
+
 
 
       

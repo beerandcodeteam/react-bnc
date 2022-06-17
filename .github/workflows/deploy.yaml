@@ -1,0 +1,31 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build artifact
+    steps:
+      - uses: actions/checkout@v2
+        name: Installing dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Creating deployment artifact
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: tar -czf "${GITHUB_SHA}".tar.gz build
+      
+      - name: Storing artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-build
+          path: ${{ github.sha }}.tar.gz
+
+      

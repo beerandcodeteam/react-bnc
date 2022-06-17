@@ -59,7 +59,20 @@ jobs:
           script: |
             mkdir -p /home/project/releases/${{ github.sha }}
             tar -xzf /tmp/${{ github.sha }}.tar.gz -C /home/project/releases/${{ github.sha }}
-
+  set-release:
+    runs-on: ubuntu-latest
+    needs: prepare-release
+    name: Activate release
+    steps:
+      - name: Activating release
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DO_HOST }}
+          username: ${{ secrets.DO_USER }}
+          key: ${{ secrets.DO_KEY }}
+          port: 22
+          script: |
+            ln -s -n -f /home/project/releases/${{ github.sha }}/build /var/www/html/current
 
 
       
